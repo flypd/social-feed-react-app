@@ -13,5 +13,5 @@ storiesOf('Widget', module)
   .addDecorator(withKnobs)
   .add('default', () =>
     <Widget
-      {...object('widgetProps', { ...widgetProps })}
+      {...object('widgetProps', widgetProps)}
     />)

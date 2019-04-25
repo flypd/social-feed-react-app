@@ -1,5 +1,4 @@
 import React, { useState } from 'react'
-import './App.css'
 import Widget from './components/Widget'
 import WidgetForm from './components/WidgetForm'
 

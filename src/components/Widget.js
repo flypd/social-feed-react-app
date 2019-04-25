@@ -1,28 +1,47 @@
 import React, { useEffect, useState } from 'react'
 import Feed from './Feed'
 import useInterval from '../hooks/useInterval'
+import { fetchNewPosts } from '../services/feed'
+import { toUnixTimestamp } from '../utils'
 
 export default function Widget ({ feedUrl, updateInterval, numberOfPosts }) {
   const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState(null)
   const [posts, setPosts] = useState([])
 
+  const latestPost = posts[0] || {}
+
   useEffect(() => {
-    fetchNewPosts(feedUrl, numberOfPosts)
-      .then(setPosts)
-      .then(() => setIsLoading(false))
+    function initialFetch () {
+      fetchNewPosts(feedUrl, numberOfPosts)
+        .then(setPosts)
+        .then(() => setIsLoading(false))
+        .catch(error => setError(error.message))
+    }
+
+    setError(null)
+    initialFetch()
   }, [feedUrl, numberOfPosts])
 
   useInterval(async () => {
-    const newPosts = await fetchNewPosts(feedUrl, numberOfPosts)
-    setPosts(newPosts)
+    try {
+
+      const fetchedPosts = await fetchNewPosts(feedUrl, numberOfPosts, toUnixTimestamp(latestPost.createdAt))
+      setPosts(processPosts(fetchedPosts, posts, numberOfPosts))
+      setError(null)
+    } catch (e) {
+      setError(e.message)
+    }
   }, updateInterval)
 
-  return isLoading ? <span>'Loading posts'</span> : <Feed posts={posts}/>
+  return <Feed posts={posts} isLoading={isLoading} error={error}/>
 }
 
-function fetchNewPosts (feedUrl, number) {
-  const url = `${feedUrl}?limit=${number}`
-  console.log('Fetching new posts', url)
-  return fetch(url)
-    .then(response => response.json())
+function processPosts (prevPosts, newPosts, numberOfPosts) {
+  const uniquePosts = [...newPosts, ...prevPosts]
+    .reduce((acc, post) => ({ ...acc, [post.id]: post }), {})
+  return Object.values(uniquePosts)
+  // reverse sort by date
+    .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+    .slice(0, numberOfPosts)
 }
