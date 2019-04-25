@@ -1,7 +1,7 @@
 import React from 'react'
 import { formatDate } from '../utils'
 
-export default function Post ({ author, body, created_at }) {
+export default function Post ({ author, body, createdAt }) {
   return (
     <article className="card">
       <div className='card-body'>
@@ -14,7 +14,7 @@ export default function Post ({ author, body, created_at }) {
         </div>
 
         <div className='card-subtitle text-muted mb-2'>
-          <small>{formatDate(created_at)}
+          <small>{formatDate(createdAt)}
           </small>
         </div>
 

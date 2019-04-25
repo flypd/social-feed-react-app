@@ -10,3 +10,14 @@ export function formatDate (dateString) {
   }
   return date.toLocaleString(language, options)
 }
+
+export function renameProp (oldProp, newProp, { [oldProp]: old, ...others }) {
+  return {
+    [newProp]: old,
+    ...others
+  }
+}
+
+export function toUnixTimestamp (dateString) {
+  return parseInt((new Date(dateString).getTime() / 1000).toFixed(0))
+}
